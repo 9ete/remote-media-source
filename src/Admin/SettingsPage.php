@@ -197,7 +197,7 @@ class SettingsPage {
 					<td>
 						<input type="password" id="rms_remote_key" name="rms_remote_key" class="regular-text"
 							autocomplete="new-password"
-							placeholder="<?php echo get_option( 'rms_remote_key', '' ) ? esc_attr__( '(key saved — enter new key to replace)', 'remote-media-source' ) : ''; ?>"
+							placeholder="<?php echo get_option( 'rms_remote_key', '' ) ? esc_attr( __( '(key saved — enter new key to replace)', 'remote-media-source' ) ) : ''; ?>"
 							value="">
 						<button type="button" class="button" id="rms-reveal-key">
 							<?php esc_html_e( 'Reveal', 'remote-media-source' ); ?>
