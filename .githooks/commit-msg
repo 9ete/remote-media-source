@@ -1,0 +1,28 @@
+#!/bin/sh
+
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+
+if ! echo "$commit_msg" | grep -qE '^(Merge|fixup!|squash!) '; then
+	pattern='^([A-Z]+-[0-9]+: )?(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9 _/.-]+\))?!?: .+'
+	if ! echo "$commit_msg" | head -1 | grep -qE "$pattern"; then
+		echo ""
+		echo "ERROR: Commit message does not follow Conventional Commits."
+		echo ""
+		echo "  Expected: [TICKET-NNN: ]<type>[optional scope]: <description>"
+		echo "  Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+		echo ""
+		echo "  Examples:"
+		echo "    feat(source): add key generation endpoint"
+		echo "    fix(consumer): correct upload_dir baseurl trailing slash"
+		echo "    chore: update composer.lock"
+		echo ""
+		echo "  Your message: $(head -1 "$commit_msg_file")"
+		echo ""
+		exit 1
+	fi
+fi
+
+composer lint:fix
+composer lint
+composer test:unit:php

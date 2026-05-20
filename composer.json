@@ -1,0 +1,24 @@
+{
+	"require-dev": {
+		"squizlabs/php_codesniffer": "^3.13",
+		"wp-coding-standards/wpcs": "^3.3",
+		"phpcompatibility/phpcompatibility-wp": "^2.1",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+		"wp-cli/wp-cli-bundle": "^2.12",
+		"phpunit/phpunit": "^10.5"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"scripts": {
+		"install-hooks": "git config core.hooksPath .githooks",
+		"lint": "phpcs",
+		"lint:fix": "phpcbf",
+		"test": "phpunit",
+		"test:unit:php": "./vendor/bin/phpunit",
+		"build-zip": "./bin/build-zip.sh",
+		"plugin-check": "./bin/build-zip.sh -q && unzip -q remote-media-source.zip && wp plugin check remote-media-source && rm -f remote-media-source.zip && rm -rf remote-media-source"
+	}
+}
