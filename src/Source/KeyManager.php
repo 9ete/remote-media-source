@@ -26,7 +26,7 @@ class KeyManager {
 	 * @return string 64-char hex key (shown once — not stored).
 	 */
 	public static function generate(): string {
-		$key = wp_generate_password( 64, false );
+		$key = bin2hex( random_bytes( 32 ) );
 		update_option( static::HASH_OPTION, wp_hash( $key ) );
 		update_option( static::PREFIX_OPTION, substr( $key, 0, 8 ) );
 		return $key;
