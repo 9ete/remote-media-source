@@ -50,6 +50,8 @@ class Plugin {
 	 * Register all services.
 	 */
 	public function init(): void {
+		load_plugin_textdomain( 'remote-media-source', false, dirname( plugin_basename( RMS_PLUGIN_FILE ) ) . '/languages' );
+
 		foreach ( $this->services as $service ) {
 			$service::register();
 		}
