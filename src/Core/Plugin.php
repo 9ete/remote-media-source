@@ -24,9 +24,11 @@ class Plugin {
 	private array $services = array();
 
 	/**
-	 * Admin-only services: [hook, callable] pairs.
+	 * Admin-only services registered when is_admin() is true.
 	 *
-	 * @var array<array{0: string, 1: callable}>
+	 * Each class must expose a static register() method.
+	 *
+	 * @var array<class-string>
 	 */
 	private array $admin_services = array();
 
@@ -41,15 +43,14 @@ class Plugin {
 	 * Register all services.
 	 */
 	public function init(): void {
-		if ( is_admin() ) {
-			foreach ( $this->admin_services as $service ) {
-				[ $hook, $callback ] = $service;
-				add_action( $hook, $callback );
-			}
-		}
-
 		foreach ( $this->services as $service ) {
 			$service::register();
+		}
+
+		if ( is_admin() ) {
+			foreach ( $this->admin_services as $service ) {
+				$service::register();
+			}
 		}
 	}
 }
