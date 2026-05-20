@@ -10,9 +10,7 @@ namespace RemoteMediaSource\Tests\Unit\Source;
 use PHPUnit\Framework\TestCase;
 use RemoteMediaSource\Source\KeyManager;
 
-/**
- * @covers RemoteMediaSource\Source\KeyManager
- */
+#[\PHPUnit\Framework\Attributes\CoversClass( KeyManager::class )]
 class KeyManagerTest extends TestCase {
 
 	protected function setUp(): void {
@@ -81,5 +79,25 @@ class KeyManagerTest extends TestCase {
 		KeyManager::generate();
 		$new = KeyManager::rotate();
 		$this->assertTrue( KeyManager::verify( $new ) );
+	}
+
+	public function test_rotate_returns_different_key_than_previous(): void {
+		$old = KeyManager::generate();
+		$new = KeyManager::rotate();
+		$this->assertNotSame( $old, $new );
+	}
+
+	public function test_rotate_updates_stored_prefix(): void {
+		KeyManager::generate();
+		$new = KeyManager::rotate();
+		$this->assertSame( substr( $new, 0, 8 ), KeyManager::get_prefix() );
+	}
+
+	public function test_generate_does_not_store_raw_key_in_options(): void {
+		$key = KeyManager::generate();
+		$this->assertArrayNotHasKey( $key, $GLOBALS['rms_test_options'] );
+		foreach ( $GLOBALS['rms_test_options'] as $stored ) {
+			$this->assertNotSame( $key, $stored );
+		}
 	}
 }
