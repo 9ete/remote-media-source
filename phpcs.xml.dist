@@ -12,10 +12,6 @@
   <exclude-pattern>*/docs/*</exclude-pattern>
   <exclude-pattern>*/brain/*</exclude-pattern>
 
-  <rule ref="WordPress" />
-  <rule ref="WordPress-Extra" />
-  <rule ref="WordPress-Docs" />
-
   <rule ref="WordPress">
     <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
     <exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
@@ -24,6 +20,7 @@
     <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
     <exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
   </rule>
+  <rule ref="WordPress-Docs" />
 
   <config name="testVersion" value="8.1-8.4"/>
   <rule ref="PHPCompatibilityWP" />

@@ -109,9 +109,9 @@ if ( ! class_exists( 'WP_Error' ) ) {
 	class WP_Error {
 		public string $code;
 		public string $message;
-		public array $data;
+		public mixed $data;
 
-		public function __construct( string $code = '', string $message = '', array $data = array() ) {
+		public function __construct( string $code = '', string $message = '', mixed $data = array() ) {
 			$this->code    = $code;
 			$this->message = $message;
 			$this->data    = $data;
