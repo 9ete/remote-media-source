@@ -49,6 +49,8 @@ class Assets {
 					'testConnection'    => __( 'Test Connection', 'remote-media-source' ),
 					'hide'              => __( 'Hide', 'remote-media-source' ),
 					'reveal'            => __( 'Reveal', 'remote-media-source' ),
+					'copyKey'           => __( 'Copy Key', 'remote-media-source' ),
+					'requestFailed'     => __( 'Request failed.', 'remote-media-source' ),
 				),
 			)
 		);

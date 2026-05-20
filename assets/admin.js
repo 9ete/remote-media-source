@@ -31,7 +31,9 @@
 				$( '#rms-key-modal-value' ).val( response.data.key );
 				$( '#rms-key-modal' ).show();
 			}
-		);
+		).fail( function () {
+			window.alert( rmsAdmin.i18n.requestFailed );
+		} );
 	} );
 
 	// Copy key from modal.
@@ -42,7 +44,7 @@
 			navigator.clipboard.writeText( key ).then( function () {
 				$btn.text( rmsAdmin.i18n.copySuccess );
 				setTimeout( function () {
-					$btn.text( 'Copy Key' );
+					$btn.text( rmsAdmin.i18n.copyKey );
 				}, 2000 );
 			} );
 		} else {
@@ -88,7 +90,7 @@
 			}
 		).fail( function () {
 			$btn.prop( 'disabled', false ).text( rmsAdmin.i18n.testConnection );
-			$result.css( 'color', '#d63638' ).text( '✗ Request failed.' );
+			$result.css( 'color', '#d63638' ).text( '✗ ' + rmsAdmin.i18n.requestFailed );
 		} );
 	} );
 
