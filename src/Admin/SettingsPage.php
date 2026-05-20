@@ -322,6 +322,7 @@ class SettingsPage {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => esc_html__( 'Unauthorized.', 'remote-media-source' ) ) );
+			return;
 		}
 
 		$key = KeyManager::generate();
@@ -342,6 +343,7 @@ class SettingsPage {
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => esc_html__( 'Unauthorized.', 'remote-media-source' ) ) );
+			return;
 		}
 
 		$url = (string) get_option( 'rms_remote_url', '' );
@@ -349,6 +351,7 @@ class SettingsPage {
 
 		if ( ! $url ) {
 			wp_send_json_error( array( 'message' => esc_html__( 'Remote Source URL is not configured.', 'remote-media-source' ) ) );
+			return;
 		}
 
 		// Step 1: basic reachability.
@@ -361,6 +364,7 @@ class SettingsPage {
 					$head->get_error_message()
 				) )
 			);
+			return;
 		}
 
 		$code = wp_remote_retrieve_response_code( $head );
@@ -372,6 +376,7 @@ class SettingsPage {
 					(int) $code
 				) )
 			);
+			return;
 		}
 
 		// Step 2: REST verify handshake.
@@ -391,12 +396,14 @@ class SettingsPage {
 					$response->get_error_message()
 				) )
 			);
+			return;
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( empty( $body['verified'] ) ) {
 			wp_send_json_error( array( 'message' => esc_html__( 'Remote did not verify. Check your connection key.', 'remote-media-source' ) ) );
+			return;
 		}
 
 		$status = array(
