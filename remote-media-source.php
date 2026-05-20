@@ -17,16 +17,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$rms_data = get_file_data(
-	__FILE__,
-	array(
-		'Version'     => 'Version',
-		'Text Domain' => 'Text Domain',
-	),
-	'plugin'
-);
-
-define( 'RMS_VERSION', $rms_data['Version'] );
+define( 'RMS_VERSION', '1.0.0' );
 define( 'RMS_PLUGIN_FILE', __FILE__ );
 define( 'RMS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'RMS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
