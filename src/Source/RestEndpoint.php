@@ -88,7 +88,7 @@ class RestEndpoint {
 				'site_name'       => get_bloginfo( 'name' ),
 				'wp_version'      => get_bloginfo( 'version' ),
 				'plugin_version'  => RMS_VERSION,
-				'uploads_baseurl' => $upload_dir['baseurl'],
+				'uploads_baseurl' => esc_url_raw( $upload_dir['baseurl'] ),
 			),
 			200
 		);
