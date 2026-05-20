@@ -21,10 +21,10 @@ class SettingsPage {
 	 * Register all hooks for the settings page.
 	 */
 	public static function register(): void {
-		add_action( 'admin_menu', array( static::class, 'add_page' ) );
-		add_action( 'admin_post_rms_save_settings', array( static::class, 'handle_save' ) );
-		add_action( 'wp_ajax_rms_generate_key', array( static::class, 'ajax_generate_key' ) );
-		add_action( 'wp_ajax_rms_test_connection', array( static::class, 'ajax_test_connection' ) );
+		add_action( 'admin_menu', array( self::class, 'add_page' ) );
+		add_action( 'admin_post_rms_save_settings', array( self::class, 'handle_save' ) );
+		add_action( 'wp_ajax_rms_generate_key', array( self::class, 'ajax_generate_key' ) );
+		add_action( 'wp_ajax_rms_test_connection', array( self::class, 'ajax_test_connection' ) );
 	}
 
 	/**
@@ -36,7 +36,7 @@ class SettingsPage {
 			esc_html__( 'Remote Media Source', 'remote-media-source' ),
 			'manage_options',
 			'remote-media-source',
-			array( static::class, 'render' )
+			array( self::class, 'render' )
 		);
 	}
 
@@ -59,15 +59,15 @@ class SettingsPage {
 				</div>
 			<?php endif; ?>
 
-			<?php static::render_key_modal(); ?>
+			<?php self::render_key_modal(); ?>
 
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<?php wp_nonce_field( 'rms_save_settings', 'rms_nonce' ); ?>
 				<input type="hidden" name="action" value="rms_save_settings">
 
-				<?php static::render_role_section( $role ); ?>
-				<?php static::render_source_section( $role ); ?>
-				<?php static::render_consumer_section( $role ); ?>
+				<?php self::render_role_section( $role ); ?>
+				<?php self::render_source_section( $role ); ?>
+				<?php self::render_consumer_section( $role ); ?>
 
 				<?php submit_button( __( 'Save Settings', 'remote-media-source' ) ); ?>
 			</form>

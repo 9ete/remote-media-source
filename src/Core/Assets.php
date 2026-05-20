@@ -18,7 +18,7 @@ class Assets {
 	 * Register the admin_enqueue_scripts hook.
 	 */
 	public static function register(): void {
-		add_action( 'admin_enqueue_scripts', array( static::class, 'enqueue' ) );
+		add_action( 'admin_enqueue_scripts', array( self::class, 'enqueue' ) );
 	}
 
 	/**
