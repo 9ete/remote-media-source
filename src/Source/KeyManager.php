@@ -1,0 +1,75 @@
+<?php
+/**
+ * Connection key manager for the Source role.
+ *
+ * @package RemoteMediaSource
+ */
+
+namespace RemoteMediaSource\Source;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Generates, stores (hashed), verifies, and rotates the connection key.
+ *
+ * The raw key is returned once on generate/rotate and never stored.
+ * The hash (wp_hash) and prefix (first 8 chars) are stored in wp_options.
+ */
+class KeyManager {
+
+	private const HASH_OPTION   = 'rms_connection_key_hash';
+	private const PREFIX_OPTION = 'rms_connection_key_prefix';
+
+	/**
+	 * Generate a new connection key, store hash + prefix, return raw key.
+	 *
+	 * @return string 64-char hex key (shown once — not stored).
+	 */
+	public static function generate(): string {
+		$key = wp_generate_password( 64, false );
+		update_option( static::HASH_OPTION, wp_hash( $key ) );
+		update_option( static::PREFIX_OPTION, substr( $key, 0, 8 ) );
+		return $key;
+	}
+
+	/**
+	 * Regenerate the key, invalidating the previous one.
+	 *
+	 * @return string New 64-char hex key.
+	 */
+	public static function rotate(): string {
+		return static::generate();
+	}
+
+	/**
+	 * Verify a supplied key against the stored hash.
+	 *
+	 * @param string $key Raw key to verify.
+	 * @return bool True if valid.
+	 */
+	public static function verify( string $key ): bool {
+		$stored = get_option( static::HASH_OPTION, '' );
+		if ( ! $stored ) {
+			return false;
+		}
+		return hash_equals( $stored, wp_hash( $key ) );
+	}
+
+	/**
+	 * Whether a key has been generated for this site.
+	 *
+	 * @return bool
+	 */
+	public static function has_key(): bool {
+		return (bool) get_option( static::HASH_OPTION, '' );
+	}
+
+	/**
+	 * Return the stored 8-char prefix (safe to display in UI).
+	 *
+	 * @return string
+	 */
+	public static function get_prefix(): string {
+		return (string) get_option( static::PREFIX_OPTION, '' );
+	}
+}
