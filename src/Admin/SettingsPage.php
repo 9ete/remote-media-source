@@ -196,8 +196,9 @@ class SettingsPage {
 					</th>
 					<td>
 						<input type="password" id="rms_remote_key" name="rms_remote_key" class="regular-text"
-							autocomplete="off"
-							value="<?php echo esc_attr( (string) get_option( 'rms_remote_key', '' ) ); ?>">
+							autocomplete="new-password"
+							placeholder="<?php echo get_option( 'rms_remote_key', '' ) ? esc_attr__( '(key saved — enter new key to replace)', 'remote-media-source' ) : ''; ?>"
+							value="">
 						<button type="button" class="button" id="rms-reveal-key">
 							<?php esc_html_e( 'Reveal', 'remote-media-source' ); ?>
 						</button>
@@ -335,6 +336,11 @@ class SettingsPage {
 			return;
 		}
 
+		if ( 'source' !== get_option( 'rms_role', '' ) ) {
+			wp_send_json_error( array( 'message' => esc_html__( 'This site is not configured as a source.', 'remote-media-source' ) ) );
+			return;
+		}
+
 		$key = KeyManager::generate();
 
 		wp_send_json_success(
@@ -364,32 +370,7 @@ class SettingsPage {
 			return;
 		}
 
-		// Step 1: basic reachability.
-		$head = wp_remote_head( esc_url_raw( $url ) );
-		if ( is_wp_error( $head ) ) {
-			wp_send_json_error(
-				array( 'message' => sprintf(
-					/* translators: %s: error message */
-					esc_html__( 'Remote URL unreachable: %s', 'remote-media-source' ),
-					$head->get_error_message()
-				) )
-			);
-			return;
-		}
-
-		$code = wp_remote_retrieve_response_code( $head );
-		if ( $code >= 400 ) {
-			wp_send_json_error(
-				array( 'message' => sprintf(
-					/* translators: %d: HTTP status code */
-					esc_html__( 'Remote returned HTTP %d.', 'remote-media-source' ),
-					(int) $code
-				) )
-			);
-			return;
-		}
-
-		// Step 2: REST verify handshake.
+		// REST verify handshake.
 		$response = wp_remote_get(
 			esc_url_raw( rtrim( $url, '/' ) . '/wp-json/rms/v1/verify' ),
 			array(

@@ -1,6 +1,6 @@
 <?php
 /**
- * Rewrites the upload directory URL to the configured remote source.
+ * Upload directory URL rewriting for consumer environments.
  *
  * @package RemoteMediaSource
  */
@@ -10,33 +10,62 @@ namespace RemoteMediaSource\Consumer;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Hooks the upload_dir filter when the consumer role is active and a
- * verified connection exists.
+ * Rewrites upload directory base URLs to the remote source.
+ * Skips during active file uploads so new files are tracked with local URLs.
  */
 class UploadDir {
 
 	/**
-	 * Register the upload_dir filter.
+	 * True while a file upload is in progress.
+	 *
+	 * @var bool
+	 */
+	private static bool $uploading = false;
+
+	/**
+	 * Register hooks.
 	 */
 	public static function register(): void {
-		add_filter( 'upload_dir', array( static::class, 'filter' ) );
+		add_filter( 'upload_dir', array( self::class, 'filter' ) );
+		add_filter( 'wp_handle_upload_prefilter', array( self::class, 'upload_start' ), 1 );
+		add_action( 'wp_handle_upload', array( self::class, 'upload_end' ), 999 );
+		add_action( 'wp_handle_sideload', array( self::class, 'upload_end' ), 999 );
 	}
 
 	/**
-	 * Rewrite upload URLs to the remote source.
+	 * Mark that an upload is in progress (set before wp_upload_dir() is called).
 	 *
-	 * basedir and path are left unchanged so local-mode uploads still land
-	 * in the local filesystem.
+	 * @param array $file Uploaded file descriptor.
+	 * @return array Unchanged.
+	 */
+	public static function upload_start( array $file ): array {
+		self::$uploading = true;
+		return $file;
+	}
+
+	/**
+	 * Clear the upload-in-progress flag.
+	 */
+	public static function upload_end(): void {
+		self::$uploading = false;
+	}
+
+	/**
+	 * Rewrite upload base URLs to the remote source.
 	 *
-	 * @param array $dirs WP upload dir data.
-	 * @return array Modified upload dir data.
+	 * @param array $dirs Current upload directory values.
+	 * @return array Modified upload directory values.
 	 */
 	public static function filter( array $dirs ): array {
-		if ( ! static::is_active() ) {
+		if ( self::$uploading ) {
 			return $dirs;
 		}
 
-		$base            = rtrim( get_option( 'rms_remote_url', '' ), '/' ) . '/wp-content/uploads';
+		if ( ! self::is_active() ) {
+			return $dirs;
+		}
+
+		$base        = rtrim( get_option( 'rms_remote_url', '' ), '/' ) . '/wp-content/uploads';
 		$dirs['baseurl'] = $base;
 		$dirs['url']     = $base . '/' . gmdate( 'Y/m' );
 
@@ -44,10 +73,7 @@ class UploadDir {
 	}
 
 	/**
-	 * Whether the URL rewrite should be active.
-	 *
-	 * Requires: consumer role, non-empty remote URL, and at least one
-	 * successful test connection on record.
+	 * Check whether URL rewriting should be active.
 	 *
 	 * @return bool
 	 */
@@ -61,7 +87,6 @@ class UploadDir {
 		}
 
 		$last = get_option( 'rms_last_connection', array() );
-
 		return ! empty( $last['success'] );
 	}
 }
