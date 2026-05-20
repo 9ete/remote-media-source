@@ -15,11 +15,18 @@ defined( 'ABSPATH' ) || exit;
 class Assets {
 
 	/**
+	 * Register the admin_enqueue_scripts hook.
+	 */
+	public static function register(): void {
+		add_action( 'admin_enqueue_scripts', array( static::class, 'enqueue' ) );
+	}
+
+	/**
 	 * Enqueue scripts if on the plugin settings page.
 	 *
 	 * @param string $hook_suffix Current admin page hook suffix.
 	 */
-	public static function register( string $hook_suffix ): void {
+	public static function enqueue( string $hook_suffix ): void {
 		if ( 'settings_page_remote-media-source' !== $hook_suffix ) {
 			return;
 		}

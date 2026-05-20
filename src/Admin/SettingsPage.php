@@ -18,9 +18,19 @@ use RemoteMediaSource\Source\KeyManager;
 class SettingsPage {
 
 	/**
-	 * Register the options page (callback for admin_menu hook).
+	 * Register all hooks for the settings page.
 	 */
 	public static function register(): void {
+		add_action( 'admin_menu', array( static::class, 'add_page' ) );
+		add_action( 'admin_post_rms_save_settings', array( static::class, 'handle_save' ) );
+		add_action( 'wp_ajax_rms_generate_key', array( static::class, 'ajax_generate_key' ) );
+		add_action( 'wp_ajax_rms_test_connection', array( static::class, 'ajax_test_connection' ) );
+	}
+
+	/**
+	 * Register the options page (admin_menu callback).
+	 */
+	public static function add_page(): void {
 		add_options_page(
 			esc_html__( 'Remote Media Source', 'remote-media-source' ),
 			esc_html__( 'Remote Media Source', 'remote-media-source' ),

@@ -21,7 +21,11 @@ class Plugin {
 	 *
 	 * @var array<class-string>
 	 */
-	private array $services = array();
+	private array $services = array(
+		\RemoteMediaSource\Source\RestEndpoint::class,
+		\RemoteMediaSource\Consumer\UploadDir::class,
+		\RemoteMediaSource\Consumer\UploadMode::class,
+	);
 
 	/**
 	 * Admin-only services registered when is_admin() is true.
@@ -30,7 +34,10 @@ class Plugin {
 	 *
 	 * @var array<class-string>
 	 */
-	private array $admin_services = array();
+	private array $admin_services = array(
+		\RemoteMediaSource\Admin\SettingsPage::class,
+		\RemoteMediaSource\Core\Assets::class,
+	);
 
 	/**
 	 * Hook into WordPress lifecycle.
