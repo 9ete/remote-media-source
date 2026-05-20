@@ -1,0 +1,30 @@
+# Dependencies
+vendor/
+node_modules/
+
+# Build output
+zips/
+*.zip
+
+# OS
+.DS_Store
+*.swp
+
+# IDE
+.vscode/
+.idea/
+
+# WP
+wp-content/debug.log
+wp-content/error-debug.log
+
+# PHP tooling cache
+.phpunit.result.cache
+.phpcs-cache
+
+# Env
+.env
+.env.*
+
+# Claude worktrees
+.claude/
