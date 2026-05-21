@@ -1,7 +1,7 @@
 name: rms-consumer-2
 recipe: wordpress
 config:
-  webroot: wordpress
+  webroot: .
   php: '8.2'
   database: mariadb:10.6
 
@@ -9,7 +9,7 @@ services:
   appserver:
     overrides:
       volumes:
-        - ../../:/app/wordpress/wp-content/plugins/remote-media-source
+        - ../../:/app/wp-content/plugins/remote-media-source
       extra_hosts:
         - "rms-source.lndo.site:host-gateway"
 
