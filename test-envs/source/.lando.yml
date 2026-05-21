@@ -1,0 +1,19 @@
+name: rms-source
+recipe: wordpress
+config:
+  webroot: wordpress
+  php: '8.2'
+  database: mariadb:10.6
+
+services:
+  appserver:
+    overrides:
+      # Mount plugin root directly into the plugins directory.
+      # Relative path resolves from this .lando.yml location (test-envs/source/).
+      volumes:
+        - ../../:/app/wordpress/wp-content/plugins/remote-media-source
+
+tooling:
+  wp:
+    service: appserver
+    cmd: wp --allow-root

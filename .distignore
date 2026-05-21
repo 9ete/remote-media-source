@@ -39,6 +39,9 @@ brain
 *.md
 *.markdown
 
+# Test environments
+test-envs
+
 # Build output
 zips
 *.zip

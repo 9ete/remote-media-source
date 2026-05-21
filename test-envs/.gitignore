@@ -1,0 +1,8 @@
+# WordPress core (downloaded by setup.sh — not committed)
+*/wordpress/
+
+# Lando runtime state
+*/.lando/
+
+# WP uploads / logs generated during testing
+*/wordpress-uploads/
