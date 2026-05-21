@@ -45,8 +45,9 @@ else
 fi
 
 echo "==> Adding local-dev mu-plugin (SSL bypass for Lando self-signed certs)..."
-mkdir -p wordpress/wp-content/mu-plugins
-cat > wordpress/wp-content/mu-plugins/rms-local-dev.php << 'PHP'
+# webroot is '.' so wp-content lives at the env root, not inside wordpress/
+mkdir -p wp-content/mu-plugins
+cat > wp-content/mu-plugins/rms-local-dev.php << 'PHP'
 <?php
 /**
  * Local development helpers for Remote Media Source testing.

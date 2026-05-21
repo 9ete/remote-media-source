@@ -125,4 +125,40 @@ class UploadDirTest extends TestCase {
 
 		$this->assertFalse( UploadDir::is_active() );
 	}
+
+	/**
+	 * Regression: wp_handle_upload is a filter, not just an action.
+	 * upload_end() must return the file array unchanged so wp_handle_upload()
+	 * does not return null and break media_handle_upload().
+	 */
+	public function test_upload_end_returns_file_array_unchanged(): void {
+		$file = array(
+			'file' => '/var/www/html/wp-content/uploads/2026/05/image.png',
+			'url'  => 'http://local.test/wp-content/uploads/2026/05/image.png',
+			'type' => 'image/png',
+		);
+
+		$result = UploadDir::upload_end( $file );
+
+		$this->assertSame( $file, $result );
+	}
+
+	public function test_filter_skips_rewrite_while_upload_in_progress(): void {
+		$GLOBALS['rms_test_options']['rms_role']            = 'consumer';
+		$GLOBALS['rms_test_options']['rms_remote_url']      = 'https://example.com';
+		$GLOBALS['rms_test_options']['rms_last_connection'] = array( 'success' => true );
+
+		// Simulate upload_start.
+		$dummy_file = array( 'name' => 'test.png', 'tmp_name' => '/tmp/test.png', 'error' => 0 );
+		UploadDir::upload_start( $dummy_file );
+
+		// Filter should be skipped while uploading.
+		$result = UploadDir::filter( $this->base_dirs );
+		$this->assertSame( $this->base_dirs, $result );
+
+		// After upload_end the filter should rewrite again.
+		UploadDir::upload_end( array( 'file' => '/tmp/test.png', 'url' => 'http://local.test/wp-content/uploads/2026/05/test.png', 'type' => 'image/png' ) );
+		$result = UploadDir::filter( $this->base_dirs );
+		$this->assertSame( 'https://example.com/wp-content/uploads', $result['baseurl'] );
+	}
 }
