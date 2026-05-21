@@ -16,7 +16,7 @@ echo "==> Starting Lando..."
 lando start
 
 echo "==> Downloading WordPress core..."
-lando wp core download --version=latest --skip-content 2>/dev/null || true
+lando wp core download --version=latest --skip-content --force
 
 echo "==> Creating wp-config.php..."
 lando wp config create \
@@ -58,6 +58,9 @@ cat > wordpress/wp-content/mu-plugins/rms-local-dev.php << 'PHP'
 add_filter( 'https_ssl_verify', '__return_false' );
 add_filter( 'https_local_ssl_verify', '__return_false' );
 PHP
+
+echo "==> Installing default theme..."
+lando wp theme install twentytwentyfive --activate 2>/dev/null || true
 
 echo "==> Activating Remote Media Source plugin..."
 lando wp plugin activate remote-media-source

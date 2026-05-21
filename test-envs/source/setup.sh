@@ -15,7 +15,9 @@ echo "==> Starting Lando..."
 lando start
 
 echo "==> Downloading WordPress core..."
-lando wp core download --version=latest --skip-content 2>/dev/null || true
+# --skip-content avoids writing into the volume-mounted wp-content/.
+# --force handles the case where the volume mount already created wp-content/.
+lando wp core download --version=latest --skip-content --force
 
 echo "==> Creating wp-config.php..."
 lando wp config create \
@@ -42,6 +44,9 @@ if ! lando wp core is-installed 2>/dev/null; then
 else
   echo "   (already installed, skipping)"
 fi
+
+echo "==> Installing default theme..."
+lando wp theme install twentytwentyfive --activate 2>/dev/null || true
 
 echo "==> Activating Remote Media Source plugin..."
 lando wp plugin activate remote-media-source

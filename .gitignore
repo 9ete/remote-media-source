@@ -28,3 +28,6 @@ wp-content/error-debug.log
 
 # Claude worktrees
 .claude/
+
+# Docker/Lando volume mount artifact (created when test-envs mount project root into WP plugins dir)
+remote-media-source/
