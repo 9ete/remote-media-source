@@ -65,6 +65,13 @@ No. Both the source and consumer must be WordPress 6.0+ sites with this plugin i
 * **Multisite (subdirectory or subdomain)** — supported on both roles. Roles, keys, and connections are configured per site. A consumer subsite keeps its own local `sites/N` upload paths while serving media URLs from the source; a source subsite reports its per-site uploads URL (for example `…/uploads/sites/2`) and connected consumers honor it.
 * **Hosting** — any host where media is served from the URL `wp_upload_dir()` reports. If your source serves uploads from a different domain than the site itself (for example a separate CDN domain), the consumer intentionally ignores that cross-host URL and falls back to `{source}/wp-content/uploads`; point the consumer directly at the host that serves the media in that case.
 
+== Screenshots ==
+
+1. Source settings — generate the connection key your consumer environments will use.
+2. A connected consumer — remote URL, key, and upload mode configured, with the connection verified.
+3. Block mode — uploads are refused on the environment with a clear explanation.
+4. The Settings action link on the Plugins screen.
+
 == External Services ==
 
 This plugin communicates with a remote WordPress site configured by the site administrator.

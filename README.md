@@ -29,15 +29,23 @@ git clone <repo>
 cd remote-media-source
 composer install
 composer install-hooks
+npm install   # Cypress e2e tooling
 ```
 
 | Command | Purpose |
 |---|---|
 | `composer lint` | PHPCS check |
 | `composer lint:fix` | PHPCBF auto-fix |
-| `composer test:unit:php` | PHPUnit unit tests |
+| `composer test` | PHPUnit unit tests |
+| `composer test:e2e` | Cypress e2e suite (needs the [test-envs](test-envs/README.md) Lando sites running) |
 | `composer build-zip` | Build distribution zip |
-| `composer plugin-check` | WP.org Plugin Check (requires WP-CLI + WP env) |
+| `composer plugin-check` | WP.org Plugin Check against the dist build (needs the rms-source Lando site) |
+| `composer wp-repo-screenshots` | Regenerate the wp.org screenshots |
+| `composer check` | Full release gate: lint + unit + e2e + plugin-check |
+
+Local end-to-end testing runs against three Lando WordPress sites (one source,
+two consumers) — see [test-envs/README.md](test-envs/README.md). WP.org listing
+assets (banner, icon) live in `.wordpress-org/` with their HTML sources.
 
 ## License
 
