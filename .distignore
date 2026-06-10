@@ -23,6 +23,10 @@ node_modules
 # JS tooling
 package.json
 package-lock.json
+cypress.config.js
+
+# WP.org SVN assets (deployed to the assets/ dir, never inside the plugin zip)
+.wordpress-org
 
 # Tests / QA
 bin
