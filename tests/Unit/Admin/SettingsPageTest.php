@@ -28,6 +28,7 @@ class SettingsPageTest extends TestCase {
 
 	protected function tearDown(): void {
 		$_POST = array();
+		$_GET  = array();
 	}
 
 	/**
@@ -266,6 +267,99 @@ class SettingsPageTest extends TestCase {
 
 		$this->assertFalse( $response->success );
 		$this->assertStringContainsString( 'redirected', $response->payload['message'] );
+	}
+
+	// ── save-error feedback ──────────────────────────────────────────────────
+
+	public function test_save_flags_invalid_url_in_redirect(): void {
+		$_POST['rms_role']       = 'consumer';
+		$_POST['rms_remote_url'] = 'http://prod.example.com';
+
+		$location = $this->run_save();
+		$this->assertStringContainsString( 'rms_errors=invalid_url', $location );
+	}
+
+	public function test_save_flags_invalid_key_in_redirect(): void {
+		$_POST['rms_role']       = 'consumer';
+		$_POST['rms_remote_url'] = 'https://prod.example.com';
+		$_POST['rms_remote_key'] = 'not-a-key';
+
+		$location = $this->run_save();
+		$this->assertStringContainsString( 'rms_errors=invalid_key', $location );
+	}
+
+	public function test_save_flags_both_errors_in_redirect(): void {
+		$_POST['rms_role']       = 'consumer';
+		$_POST['rms_remote_url'] = 'ftp://prod.example.com';
+		$_POST['rms_remote_key'] = 'nope';
+
+		$location = $this->run_save();
+		$this->assertStringContainsString( 'rms_errors=invalid_url%2Cinvalid_key', $location );
+	}
+
+	public function test_clean_save_carries_no_error_flags(): void {
+		$_POST['rms_role']       = 'consumer';
+		$_POST['rms_remote_url'] = 'https://prod.example.com';
+		$_POST['rms_remote_key'] = str_repeat( 'a', 64 );
+
+		$location = $this->run_save();
+		$this->assertStringNotContainsString( 'rms_errors', $location );
+	}
+
+	public function test_render_shows_invalid_url_error_notice(): void {
+		$_GET['rms_errors'] = 'invalid_url';
+		$html               = $this->render_for_role( 'consumer' );
+
+		$this->assertStringContainsString( 'notice-error', $html );
+		$this->assertStringContainsString( 'Remote Source URL was not saved', $html );
+	}
+
+	public function test_render_ignores_unknown_error_codes(): void {
+		$_GET['rms_errors'] = 'bogus_code,<script>';
+		$html               = $this->render_for_role( 'consumer' );
+
+		$this->assertStringNotContainsString( 'notice-error', $html );
+	}
+
+	// ── connection failure messaging ─────────────────────────────────────────
+
+	public function test_connection_explains_rejected_key_on_401(): void {
+		update_option( 'rms_remote_url', 'https://prod.example.com' );
+		$GLOBALS['rms_test_http_response'] = array(
+			'body'     => '{"code":"rms_unauthorized"}',
+			'response' => array( 'code' => 401 ),
+		);
+
+		$response = $this->run_ajax( array( SettingsPage::class, 'ajax_test_connection' ) );
+
+		$this->assertFalse( $response->success );
+		$this->assertStringContainsString( 'rejected the connection key', $response->payload['message'] );
+	}
+
+	public function test_connection_explains_missing_plugin_on_404(): void {
+		update_option( 'rms_remote_url', 'https://prod.example.com' );
+		$GLOBALS['rms_test_http_response'] = array(
+			'body'     => '{"code":"rest_no_route"}',
+			'response' => array( 'code' => 404 ),
+		);
+
+		$response = $this->run_ajax( array( SettingsPage::class, 'ajax_test_connection' ) );
+
+		$this->assertFalse( $response->success );
+		$this->assertStringContainsString( 'does not appear to be active', $response->payload['message'] );
+	}
+
+	public function test_connection_reports_remote_server_errors(): void {
+		update_option( 'rms_remote_url', 'https://prod.example.com' );
+		$GLOBALS['rms_test_http_response'] = array(
+			'body'     => '',
+			'response' => array( 'code' => 503 ),
+		);
+
+		$response = $this->run_ajax( array( SettingsPage::class, 'ajax_test_connection' ) );
+
+		$this->assertFalse( $response->success );
+		$this->assertStringContainsString( 'server error (HTTP 503)', $response->payload['message'] );
 	}
 
 	// ── ajax_generate_key() ──────────────────────────────────────────────────

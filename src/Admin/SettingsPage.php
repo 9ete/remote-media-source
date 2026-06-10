@@ -59,6 +59,8 @@ class SettingsPage {
 				</div>
 			<?php endif; ?>
 
+			<?php self::render_save_errors(); ?>
+
 			<?php self::render_key_modal(); ?>
 
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -239,6 +241,33 @@ class SettingsPage {
 	}
 
 	/**
+	 * Render error notices for fields handle_save() refused to store.
+	 *
+	 * Codes arrive as a CSV query arg on the post-save redirect; only
+	 * allowlisted codes render, so the parameter is display-driving but
+	 * not output. Read-only — no nonce required.
+	 */
+	private static function render_save_errors(): void {
+		if ( ! isset( $_GET['rms_errors'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		$messages = array(
+			'invalid_url' => __( 'The Remote Source URL was not saved — it must be a valid, publicly resolvable HTTPS URL (e.g. https://example.com).', 'remote-media-source' ),
+			'invalid_key' => __( 'The connection key was not saved — keys are exactly 64 hexadecimal characters. Copy it from the source site again.', 'remote-media-source' ),
+		);
+
+		$raw   = sanitize_text_field( wp_unslash( $_GET['rms_errors'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$codes = array_unique( explode( ',', $raw ) );
+
+		foreach ( $codes as $code ) {
+			if ( isset( $messages[ $code ] ) ) {
+				echo '<div class="notice notice-error"><p>' . esc_html( $messages[ $code ] ) . '</p></div>';
+			}
+		}
+	}
+
+	/**
 	 * Render the one-time key display modal (hidden until JS shows it).
 	 */
 	private static function render_key_modal(): void {
@@ -336,9 +365,16 @@ class SettingsPage {
 
 		update_option( 'rms_role', $new_role );
 
+		$errors = array();
+
 		if ( 'consumer' === $new_role ) {
-			$new_url = self::sanitize_remote_url( esc_url_raw( wp_unslash( $_POST['rms_remote_url'] ?? '' ) ) );
-			$old_url = (string) get_option( 'rms_remote_url', '' );
+			$typed_url = sanitize_text_field( wp_unslash( $_POST['rms_remote_url'] ?? '' ) );
+			$new_url   = self::sanitize_remote_url( esc_url_raw( wp_unslash( $_POST['rms_remote_url'] ?? '' ) ) );
+			$old_url   = (string) get_option( 'rms_remote_url', '' );
+
+			if ( '' !== $typed_url && '' === $new_url ) {
+				$errors[] = 'invalid_url';
+			}
 
 			if ( $new_url !== $old_url ) {
 				delete_option( 'rms_last_connection' );
@@ -347,18 +383,27 @@ class SettingsPage {
 			update_option( 'rms_remote_url', $new_url );
 
 			// Keys are 64 hex chars (KeyManager::generate). Anything else is
-			// noise that must never reach an Authorization header — ignore it
+			// noise that must never reach an Authorization header — refuse it
 			// and keep whatever valid key is already stored.
 			$key = sanitize_text_field( wp_unslash( $_POST['rms_remote_key'] ?? '' ) );
-			if ( '' !== $key && preg_match( '/^[a-f0-9]{64}$/i', $key ) ) {
-				update_option( 'rms_remote_key', $key );
+			if ( '' !== $key ) {
+				if ( preg_match( '/^[a-f0-9]{64}$/i', $key ) ) {
+					update_option( 'rms_remote_key', $key );
+				} else {
+					$errors[] = 'invalid_key';
+				}
 			}
 
 			$mode = sanitize_text_field( wp_unslash( $_POST['rms_upload_mode'] ?? 'local' ) );
 			update_option( 'rms_upload_mode', in_array( $mode, array( 'local', 'block' ), true ) ? $mode : 'local' );
 		}
 
-		wp_safe_redirect( admin_url( 'options-general.php?page=remote-media-source&saved=1' ) );
+		$redirect = admin_url( 'options-general.php?page=remote-media-source&saved=1' );
+		if ( $errors ) {
+			$redirect = add_query_arg( 'rms_errors', implode( ',', $errors ), $redirect );
+		}
+
+		wp_safe_redirect( $redirect );
 		exit;
 	}
 
@@ -439,6 +484,29 @@ class SettingsPage {
 		$code = (int) wp_remote_retrieve_response_code( $response );
 		if ( $code >= 300 && $code < 400 ) {
 			wp_send_json_error( array( 'message' => esc_html__( 'The remote URL redirected. Configure the final URL directly — redirects are not followed.', 'remote-media-source' ) ) );
+			return;
+		}
+
+		if ( 401 === $code || 403 === $code ) {
+			wp_send_json_error( array( 'message' => esc_html__( 'The source rejected the connection key. Re-copy the key from the source site, or regenerate it there and update this field.', 'remote-media-source' ) ) );
+			return;
+		}
+
+		if ( 404 === $code ) {
+			wp_send_json_error( array( 'message' => esc_html__( 'The remote site responded, but Remote Media Source does not appear to be active there (its REST endpoint was not found).', 'remote-media-source' ) ) );
+			return;
+		}
+
+		if ( $code >= 500 ) {
+			wp_send_json_error(
+				array(
+					'message' => sprintf(
+						/* translators: %d: HTTP status code */
+						esc_html__( 'The remote returned a server error (HTTP %d). Check the source site and try again.', 'remote-media-source' ),
+						$code
+					),
+				)
+			);
 			return;
 		}
 

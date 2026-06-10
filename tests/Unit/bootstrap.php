@@ -276,6 +276,13 @@ if ( ! function_exists( 'admin_url' ) ) {
 		return 'https://test.local/wp-admin/' . ltrim( $path, '/' );
 	}
 }
+if ( ! function_exists( 'add_query_arg' ) ) {
+	// Single key/value form only — mirrors core's encoding of the value.
+	function add_query_arg( string $key, string $value, string $url ): string {
+		$separator = str_contains( $url, '?' ) ? '&' : '?';
+		return $url . $separator . $key . '=' . rawurlencode( $value );
+	}
+}
 if ( ! function_exists( 'deactivate_plugins' ) ) {
 	function deactivate_plugins( string|array $plugins ): void {
 		$GLOBALS['rms_test_deactivated'][] = $plugins;

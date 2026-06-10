@@ -110,7 +110,21 @@ describe( 'Consumer connect flow', () => {
 		cy.get( '.notice-success' ).should( 'contain.text', 'Settings saved.' );
 
 		cy.get( '#rms-test-connection' ).click();
-		cy.get( '#rms-test-result', { timeout: 20000 } ).should( 'contain.text', 'Check your connection key' );
+		cy.get( '#rms-test-result', { timeout: 20000 } ).should( 'contain.text', 'rejected the connection key' );
+	} );
+
+	it( 'explains an invalid remote URL instead of silently dropping it', () => {
+		cy.wpLogin( CONSUMER );
+		cy.visitRmsSettings( CONSUMER );
+
+		// http:// fails the https-only scheme allowlist.
+		cy.get( '#rms_remote_url' ).clear();
+		cy.get( '#rms_remote_url' ).invoke( 'attr', 'type', 'text' );
+		cy.get( '#rms_remote_url' ).type( 'http://insecure.example.com' );
+		cy.get( 'form input[type="submit"]' ).click();
+
+		cy.get( '.notice-error' ).should( 'contain.text', 'Remote Source URL was not saved' );
+		cy.assertNoPhpErrorsOnPage();
 	} );
 	after( () => {
 		// Restore the standard source layout no matter how the spec ended.
