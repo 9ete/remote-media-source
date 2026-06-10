@@ -21,6 +21,7 @@
   <exclude-pattern>*/remote-media-source/docs/*</exclude-pattern>
   <exclude-pattern>*/remote-media-source/brain/*</exclude-pattern>
   <exclude-pattern>*/remote-media-source/remote-media-source/*</exclude-pattern>
+  <exclude-pattern>*/.plugin-check-dist/*</exclude-pattern>
 
   <rule ref="WordPress">
     <exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>

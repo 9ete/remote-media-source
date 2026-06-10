@@ -36,3 +36,6 @@ tests/e2e/cypress/downloads/
 
 # Docker/Lando volume mount artifact (created when test-envs mount project root into WP plugins dir)
 remote-media-source/
+
+# Unzipped dist staging dir used by composer plugin-check
+.plugin-check-dist/
