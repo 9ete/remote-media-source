@@ -48,10 +48,11 @@ class Plugin {
 
 	/**
 	 * Register all services.
+	 *
+	 * Translations are not loaded manually: WordPress.org auto-loads them
+	 * for hosted plugins since WP 4.6.
 	 */
 	public function init(): void {
-		load_plugin_textdomain( 'remote-media-source', false, dirname( plugin_basename( RMS_PLUGIN_FILE ) ) . '/languages' );
-
 		foreach ( $this->services as $service ) {
 			$service::register();
 		}

@@ -57,6 +57,18 @@ cat > wp-content/mu-plugins/rms-local-dev.php << 'PHP'
 // Allow wp_remote_get() to connect to Lando's self-signed SSL certs.
 add_filter( 'https_ssl_verify', '__return_false' );
 add_filter( 'https_local_ssl_verify', '__return_false' );
+
+// Treat the Lando source host as external so wp_http_validate_url() — used by
+// the plugin's reject_unsafe_urls hardening — permits requests to it even
+// though lndo.site DNS resolves to a loopback/private address.
+add_filter(
+	'http_request_host_is_external',
+	function ( $external, $host ) {
+		return 'rms-source.lndo.site' === $host ? true : $external;
+	},
+	10,
+	2
+);
 PHP
 
 echo "==> Installing default theme..."

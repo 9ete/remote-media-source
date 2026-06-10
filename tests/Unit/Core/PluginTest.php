@@ -34,11 +34,6 @@ class PluginTest extends TestCase {
 		$this->assertContains( 'plugins_loaded', $this->registered_hooks() );
 	}
 
-	public function test_init_loads_textdomain(): void {
-		( new Plugin() )->init();
-		$this->assertContains( 'remote-media-source', $GLOBALS['rms_test_textdomains'] );
-	}
-
 	public function test_init_registers_frontend_services(): void {
 		( new Plugin() )->init();
 		$hooks = $this->registered_hooks();

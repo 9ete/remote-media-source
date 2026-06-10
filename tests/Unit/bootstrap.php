@@ -292,6 +292,48 @@ if ( ! function_exists( 'human_time_diff' ) ) {
 	}
 }
 
+// ── Filter application / URL validation stubs ────────────────────────────────
+if ( ! function_exists( 'apply_filters' ) ) {
+	function apply_filters( string $hook, mixed $value, mixed ...$args ): mixed {
+		$override = $GLOBALS['rms_test_filter_overrides'][ $hook ] ?? null;
+		return null !== $override ? $override : $value;
+	}
+}
+if ( ! function_exists( 'wp_parse_url' ) ) {
+	function wp_parse_url( string $url, int $component = -1 ): mixed {
+		return parse_url( $url, $component );
+	}
+}
+if ( ! function_exists( 'untrailingslashit' ) ) {
+	function untrailingslashit( string $value ): string {
+		return rtrim( $value, '/' );
+	}
+}
+if ( ! function_exists( 'wp_http_validate_url' ) ) {
+	/**
+	 * Approximation of core's SSRF guard: http(s) scheme + host required;
+	 * loopback/private/reserved IP-literal hosts are rejected unless a test
+	 * sets $GLOBALS['rms_test_host_is_external'] = true.
+	 */
+	function wp_http_validate_url( string $url ): string|false {
+		$parsed = parse_url( $url );
+		if ( empty( $parsed['host'] ) || ! in_array( $parsed['scheme'] ?? '', array( 'http', 'https' ), true ) ) {
+			return false;
+		}
+		if ( filter_var( $parsed['host'], FILTER_VALIDATE_IP ) ) {
+			$is_public = filter_var(
+				$parsed['host'],
+				FILTER_VALIDATE_IP,
+				FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+			);
+			if ( ! $is_public && empty( $GLOBALS['rms_test_host_is_external'] ) ) {
+				return false;
+			}
+		}
+		return $url;
+	}
+}
+
 // ── Sanitization / escaping / i18n stubs ──────────────────────────────────────
 if ( ! function_exists( 'sanitize_text_field' ) ) {
 	function sanitize_text_field( string $str ): string {

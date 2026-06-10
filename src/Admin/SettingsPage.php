@@ -109,9 +109,9 @@ class SettingsPage {
 	 * @param string $role Current role value.
 	 */
 	private static function render_source_section( string $role ): void {
-		$display = 'source' === $role ? '' : ' style="display:none"';
+		$style = 'source' === $role ? '' : 'display:none';
 		?>
-		<div id="rms-source-settings"<?php echo $display; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+		<div id="rms-source-settings" style="<?php echo esc_attr( $style ); ?>">
 			<h2><?php esc_html_e( 'Source Settings', 'remote-media-source' ); ?></h2>
 			<table class="form-table">
 				<tr>
@@ -148,12 +148,12 @@ class SettingsPage {
 	 * @param string $role Current role value.
 	 */
 	private static function render_consumer_section( string $role ): void {
-		$display     = 'consumer' === $role ? '' : ' style="display:none"';
+		$style       = 'consumer' === $role ? '' : 'display:none';
 		$remote_url  = (string) get_option( 'rms_remote_url', '' );
 		$upload_mode = (string) get_option( 'rms_upload_mode', 'local' );
 		$last        = get_option( 'rms_last_connection', array() );
 		?>
-		<div id="rms-consumer-settings"<?php echo $display; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+		<div id="rms-consumer-settings" style="<?php echo esc_attr( $style ); ?>">
 			<h2><?php esc_html_e( 'Consumer Settings', 'remote-media-source' ); ?></h2>
 
 			<?php if ( ! empty( $last['success'] ) ) : ?>
@@ -227,8 +227,7 @@ class SettingsPage {
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Connection', 'remote-media-source' ); ?></th>
 					<td>
-						<button type="button" class="button" id="rms-test-connection"
-							data-nonce="<?php echo esc_attr( wp_create_nonce( 'rms_test_connection' ) ); ?>">
+						<button type="button" class="button" id="rms-test-connection">
 							<?php esc_html_e( 'Test Connection', 'remote-media-source' ); ?>
 						</button>
 						<span id="rms-test-result" style="margin-left:10px;"></span>
@@ -269,6 +268,43 @@ class SettingsPage {
 	}
 
 	/**
+	 * Validate and normalize a consumer remote URL.
+	 *
+	 * Security boundary for the plugin's entire outbound HTTP surface: only
+	 * URLs that survive this method are ever stored or fetched. Enforces an
+	 * https-only scheme allowlist (filterable for deliberate local-dev use)
+	 * and WordPress' own SSRF guard, wp_http_validate_url(), which rejects
+	 * loopback/private hosts unless explicitly allowed via the
+	 * http_request_host_is_external filter.
+	 *
+	 * @param string $raw Unsanitized URL (unslashed form input or option value).
+	 * @return string Validated URL without trailing slash, or '' when invalid.
+	 */
+	private static function sanitize_remote_url( string $raw ): string {
+		$url = esc_url_raw( trim( $raw ) );
+		if ( '' === $url ) {
+			return '';
+		}
+
+		/**
+		 * Filters the URL schemes a consumer may use for its remote source.
+		 *
+		 * @param array<string> $schemes Allowed schemes. Default: https only.
+		 */
+		$schemes = (array) apply_filters( 'remote_media_source_allowed_url_schemes', array( 'https' ) );
+
+		if ( ! in_array( wp_parse_url( $url, PHP_URL_SCHEME ), $schemes, true ) ) {
+			return '';
+		}
+
+		if ( ! wp_http_validate_url( $url ) ) {
+			return '';
+		}
+
+		return untrailingslashit( $url );
+	}
+
+	/**
 	 * Handle the settings form save (admin_post_rms_save_settings).
 	 */
 	public static function handle_save(): void {
@@ -301,7 +337,7 @@ class SettingsPage {
 		update_option( 'rms_role', $new_role );
 
 		if ( 'consumer' === $new_role ) {
-			$new_url = esc_url_raw( wp_unslash( $_POST['rms_remote_url'] ?? '' ) );
+			$new_url = self::sanitize_remote_url( esc_url_raw( wp_unslash( $_POST['rms_remote_url'] ?? '' ) ) );
 			$old_url = (string) get_option( 'rms_remote_url', '' );
 
 			if ( $new_url !== $old_url ) {
@@ -310,8 +346,11 @@ class SettingsPage {
 
 			update_option( 'rms_remote_url', $new_url );
 
+			// Keys are 64 hex chars (KeyManager::generate). Anything else is
+			// noise that must never reach an Authorization header — ignore it
+			// and keep whatever valid key is already stored.
 			$key = sanitize_text_field( wp_unslash( $_POST['rms_remote_key'] ?? '' ) );
-			if ( $key ) {
+			if ( '' !== $key && preg_match( '/^[a-f0-9]{64}$/i', $key ) ) {
 				update_option( 'rms_remote_key', $key );
 			}
 
@@ -362,20 +401,25 @@ class SettingsPage {
 			return;
 		}
 
-		$url = (string) get_option( 'rms_remote_url', '' );
+		// Re-validate at request time so a value written outside handle_save()
+		// (direct option edits, imports) cannot widen the outbound surface.
+		$url = self::sanitize_remote_url( (string) get_option( 'rms_remote_url', '' ) );
 		$key = (string) get_option( 'rms_remote_key', '' );
 
 		if ( ! $url ) {
-			wp_send_json_error( array( 'message' => esc_html__( 'Remote Source URL is not configured.', 'remote-media-source' ) ) );
+			wp_send_json_error( array( 'message' => esc_html__( 'Remote Source URL is not configured or not a valid HTTPS URL.', 'remote-media-source' ) ) );
 			return;
 		}
 
-		// REST verify handshake.
+		// REST verify handshake. Redirects are refused: following one could
+		// re-send the connection key to an unintended host.
 		$response = wp_remote_get(
-			esc_url_raw( rtrim( $url, '/' ) . '/wp-json/rms/v1/verify' ),
+			esc_url_raw( $url . '/wp-json/rms/v1/verify' ),
 			array(
-				'headers' => array( 'Authorization' => 'RMS ' . $key ),
-				'timeout' => 15,
+				'headers'            => array( 'Authorization' => 'RMS ' . $key ),
+				'timeout'            => 15,
+				'redirection'        => 0,
+				'reject_unsafe_urls' => true,
 			)
 		);
 
@@ -389,6 +433,12 @@ class SettingsPage {
 					),
 				)
 			);
+			return;
+		}
+
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		if ( $code >= 300 && $code < 400 ) {
+			wp_send_json_error( array( 'message' => esc_html__( 'The remote URL redirected. Configure the final URL directly — redirects are not followed.', 'remote-media-source' ) ) );
 			return;
 		}
 

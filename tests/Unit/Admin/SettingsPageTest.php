@@ -21,6 +21,8 @@ class SettingsPageTest extends TestCase {
 		$GLOBALS['rms_test_http_requests'] = array();
 		$GLOBALS['rms_test_user_can']      = true;
 		unset( $GLOBALS['rms_test_http_response'] );
+		unset( $GLOBALS['rms_test_filter_overrides'] );
+		unset( $GLOBALS['rms_test_host_is_external'] );
 		$_POST = array();
 	}
 
@@ -182,6 +184,88 @@ class SettingsPageTest extends TestCase {
 		$this->run_save();
 
 		$this->assertNotFalse( get_option( 'rms_last_connection' ) );
+	}
+
+	// ── remote URL validation (SSRF surface) ─────────────────────────────────
+
+	public function test_save_rejects_http_url_by_default(): void {
+		$_POST['rms_role']       = 'consumer';
+		$_POST['rms_remote_url'] = 'http://prod.example.com';
+		$this->run_save();
+
+		$this->assertSame( '', get_option( 'rms_remote_url' ) );
+	}
+
+	public function test_save_allows_http_when_scheme_filter_permits(): void {
+		$GLOBALS['rms_test_filter_overrides']['remote_media_source_allowed_url_schemes'] = array( 'http', 'https' );
+
+		$_POST['rms_role']       = 'consumer';
+		$_POST['rms_remote_url'] = 'http://dev-source.example.test';
+		$this->run_save();
+
+		$this->assertSame( 'http://dev-source.example.test', get_option( 'rms_remote_url' ) );
+	}
+
+	public function test_save_rejects_loopback_ip_url(): void {
+		$_POST['rms_role']       = 'consumer';
+		$_POST['rms_remote_url'] = 'https://127.0.0.1';
+		$this->run_save();
+
+		$this->assertSame( '', get_option( 'rms_remote_url' ) );
+	}
+
+	public function test_save_strips_trailing_slash_from_remote_url(): void {
+		$_POST['rms_role']       = 'consumer';
+		$_POST['rms_remote_url'] = 'https://prod.example.com/';
+		$this->run_save();
+
+		$this->assertSame( 'https://prod.example.com', get_option( 'rms_remote_url' ) );
+	}
+
+	public function test_save_ignores_malformed_connection_key(): void {
+		update_option( 'rms_role', 'consumer' );
+		update_option( 'rms_remote_key', str_repeat( 'a', 64 ) );
+
+		$_POST['rms_role']       = 'consumer';
+		$_POST['rms_remote_url'] = 'https://prod.example.com';
+		$_POST['rms_remote_key'] = 'not-a-key';
+		$this->run_save();
+
+		$this->assertSame( str_repeat( 'a', 64 ), get_option( 'rms_remote_key' ) );
+	}
+
+	public function test_connection_refuses_invalid_stored_url_without_any_request(): void {
+		update_option( 'rms_remote_url', 'http://internal-service.local' );
+
+		$response = $this->run_ajax( array( SettingsPage::class, 'ajax_test_connection' ) );
+
+		$this->assertFalse( $response->success );
+		$this->assertCount( 0, $GLOBALS['rms_test_http_requests'] );
+	}
+
+	public function test_connection_request_refuses_redirects_and_unsafe_urls(): void {
+		update_option( 'rms_remote_url', 'https://prod.example.com' );
+		update_option( 'rms_remote_key', str_repeat( 'a', 64 ) );
+		$GLOBALS['rms_test_http_response'] = array( 'body' => '{"verified":true,"site_name":"Prod"}' );
+
+		$this->run_ajax( array( SettingsPage::class, 'ajax_test_connection' ) );
+
+		$args = $GLOBALS['rms_test_http_requests'][0]['args'];
+		$this->assertSame( 0, $args['redirection'] );
+		$this->assertTrue( $args['reject_unsafe_urls'] );
+	}
+
+	public function test_connection_treats_redirect_response_as_failure(): void {
+		update_option( 'rms_remote_url', 'https://prod.example.com' );
+		$GLOBALS['rms_test_http_response'] = array(
+			'body'     => '',
+			'response' => array( 'code' => 301 ),
+		);
+
+		$response = $this->run_ajax( array( SettingsPage::class, 'ajax_test_connection' ) );
+
+		$this->assertFalse( $response->success );
+		$this->assertStringContainsString( 'redirected', $response->payload['message'] );
 	}
 
 	// ── ajax_generate_key() ──────────────────────────────────────────────────
