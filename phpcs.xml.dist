@@ -33,6 +33,15 @@
   </rule>
   <rule ref="WordPress-Docs" />
 
+  <!-- Lock every i18n call to the plugin's text domain. -->
+  <rule ref="WordPress.WP.I18n">
+    <properties>
+      <property name="text_domain" type="array">
+        <element value="remote-media-source"/>
+      </property>
+    </properties>
+  </rule>
+
   <config name="testVersion" value="8.1-8.4"/>
   <rule ref="PHPCompatibilityWP" />
 
