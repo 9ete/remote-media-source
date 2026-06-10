@@ -34,6 +34,33 @@ class UploadDirTest extends TestCase {
 		$this->assertSame( 'https://example.com/wp-content/uploads', $result['baseurl'] );
 	}
 
+	public function test_filter_prefers_handshake_reported_uploads_baseurl(): void {
+		$GLOBALS['rms_test_options']['rms_role']            = 'consumer';
+		$GLOBALS['rms_test_options']['rms_remote_url']      = 'https://example.com';
+		$GLOBALS['rms_test_options']['rms_last_connection'] = array(
+			'success'         => true,
+			'uploads_baseurl' => 'https://example.com/app/uploads',
+		);
+
+		$result = UploadDir::filter( $this->base_dirs );
+
+		$this->assertSame( 'https://example.com/app/uploads', $result['baseurl'] );
+		$this->assertStringStartsWith( 'https://example.com/app/uploads/', $result['url'] );
+	}
+
+	public function test_filter_falls_back_when_handshake_baseurl_empty(): void {
+		$GLOBALS['rms_test_options']['rms_role']            = 'consumer';
+		$GLOBALS['rms_test_options']['rms_remote_url']      = 'https://example.com';
+		$GLOBALS['rms_test_options']['rms_last_connection'] = array(
+			'success'         => true,
+			'uploads_baseurl' => '',
+		);
+
+		$result = UploadDir::filter( $this->base_dirs );
+
+		$this->assertSame( 'https://example.com/wp-content/uploads', $result['baseurl'] );
+	}
+
 	public function test_filter_rewrites_url_to_remote_with_date_path(): void {
 		$GLOBALS['rms_test_options']['rms_role']            = 'consumer';
 		$GLOBALS['rms_test_options']['rms_remote_url']      = 'https://example.com';

@@ -355,6 +355,30 @@ class SettingsPageTest extends TestCase {
 		$this->assertFalse( get_option( 'rms_last_connection' ) );
 	}
 
+	public function test_connection_stores_same_host_uploads_baseurl(): void {
+		update_option( 'rms_remote_url', 'https://prod.example.com' );
+		$GLOBALS['rms_test_http_response'] = array(
+			'body' => '{"verified":true,"site_name":"Prod","uploads_baseurl":"https://prod.example.com/app/uploads/"}',
+		);
+
+		$this->run_ajax( array( SettingsPage::class, 'ajax_test_connection' ) );
+
+		$last = get_option( 'rms_last_connection' );
+		$this->assertSame( 'https://prod.example.com/app/uploads', $last['uploads_baseurl'] );
+	}
+
+	public function test_connection_discards_cross_host_uploads_baseurl(): void {
+		update_option( 'rms_remote_url', 'https://prod.example.com' );
+		$GLOBALS['rms_test_http_response'] = array(
+			'body' => '{"verified":true,"site_name":"Prod","uploads_baseurl":"https://evil.example.net/uploads"}',
+		);
+
+		$this->run_ajax( array( SettingsPage::class, 'ajax_test_connection' ) );
+
+		$last = get_option( 'rms_last_connection' );
+		$this->assertSame( '', $last['uploads_baseurl'] );
+	}
+
 	public function test_successful_connection_records_verification(): void {
 		update_option( 'rms_remote_url', 'https://prod.example.com' );
 		update_option( 'rms_remote_key', 'secret-key' );

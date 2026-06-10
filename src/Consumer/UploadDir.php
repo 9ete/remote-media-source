@@ -78,7 +78,15 @@ class UploadDir {
 			return $dirs;
 		}
 
-		$base            = rtrim( get_option( 'rms_remote_url', '' ), '/' ) . '/wp-content/uploads';
+		// Prefer the uploads baseurl the source reported during the verify
+		// handshake (covers Bedrock app/uploads, custom upload_url_path, and
+		// multisite /sites/N layouts); fall back to the standard
+		// wp-content/uploads path under the configured remote URL.
+		$last = get_option( 'rms_last_connection', array() );
+		$base = empty( $last['uploads_baseurl'] )
+			? rtrim( get_option( 'rms_remote_url', '' ), '/' ) . '/wp-content/uploads'
+			: untrailingslashit( (string) $last['uploads_baseurl'] );
+
 		$dirs['baseurl'] = $base;
 		$dirs['url']     = $base . '/' . gmdate( 'Y/m' );
 

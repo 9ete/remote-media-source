@@ -71,6 +71,35 @@ describe( 'Consumer connect flow', () => {
 		} );
 	} );
 
+	it( 'honors a non-standard source uploads layout reported by the handshake', () => {
+		// Simulate a Bedrock-style source: its uploads baseurl is not
+		// wp-content/uploads. upload_url_path drives wp_upload_dir()['baseurl'].
+		cy.task( 'wpCli', { site: 'source', cmd: `option update upload_url_path ${ SOURCE }/app/uploads` } );
+
+		cy.task( 'wpCli', {
+			site: 'source',
+			cmd: `eval 'echo \\RemoteMediaSource\\Source\\KeyManager::generate();'`,
+		} ).then( ( key ) => {
+			cy.wpLogin( CONSUMER );
+			cy.visitRmsSettings( CONSUMER );
+
+			cy.get( '#rms_remote_key' ).clear();
+			cy.get( '#rms_remote_key' ).type( String( key ), { log: false } );
+			cy.get( 'form input[type="submit"]' ).click();
+
+			cy.get( '#rms-test-connection' ).click();
+			cy.get( '#rms-test-result', { timeout: 20000 } ).should( 'contain.text', 'Connected to' );
+
+			// The consumer rewrite now targets the reported layout.
+			cy.task( 'wpCli', {
+				site: 'consumer-1',
+				cmd: `eval '$d = wp_upload_dir(); echo $d["baseurl"];'`,
+			} ).then( ( baseurl ) => {
+				expect( String( baseurl ) ).to.eq( `${ SOURCE }/app/uploads` );
+			} );
+		} );
+	} );
+
 	it( 'rejects a bad connection key', () => {
 		cy.wpLogin( CONSUMER );
 		cy.visitRmsSettings( CONSUMER );
@@ -82,5 +111,9 @@ describe( 'Consumer connect flow', () => {
 
 		cy.get( '#rms-test-connection' ).click();
 		cy.get( '#rms-test-result', { timeout: 20000 } ).should( 'contain.text', 'Check your connection key' );
+	} );
+	after( () => {
+		// Restore the standard source layout no matter how the spec ended.
+		cy.task( 'wpCli', { site: 'source', cmd: `eval 'delete_option( "upload_url_path" );'` } );
 	} );
 } );

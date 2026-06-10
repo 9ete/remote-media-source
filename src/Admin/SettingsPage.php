@@ -449,10 +449,22 @@ class SettingsPage {
 			return;
 		}
 
+		// The source reports its real uploads baseurl so consumers work against
+		// non-standard layouts (Bedrock app/uploads, custom upload_url_path,
+		// multisite /sites/N). Only a baseurl on the SAME HOST as the
+		// configured remote is honored — a compromised source must not be able
+		// to point this site's media at an arbitrary third-party domain.
+		$reported        = esc_url_raw( (string) ( $body['uploads_baseurl'] ?? '' ) );
+		$uploads_baseurl = '';
+		if ( '' !== $reported && wp_parse_url( $reported, PHP_URL_HOST ) === wp_parse_url( $url, PHP_URL_HOST ) ) {
+			$uploads_baseurl = untrailingslashit( $reported );
+		}
+
 		$status = array(
-			'timestamp' => time(),
-			'success'   => true,
-			'message'   => sprintf(
+			'timestamp'       => time(),
+			'success'         => true,
+			'uploads_baseurl' => $uploads_baseurl,
+			'message'         => sprintf(
 				/* translators: %s: remote site name */
 				esc_html__( 'Connected to %s', 'remote-media-source' ),
 				sanitize_text_field( $body['site_name'] ?? 'remote site' )
