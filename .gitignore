@@ -22,6 +22,11 @@ wp-content/error-debug.log
 .phpunit.result.cache
 .phpcs-cache
 
+# Cypress run artifacts
+tests/e2e/cypress/screenshots/
+tests/e2e/cypress/videos/
+tests/e2e/cypress/downloads/
+
 # Env
 .env
 .env.*

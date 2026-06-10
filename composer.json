@@ -26,9 +26,12 @@
 		"test:unit:php": "./vendor/bin/phpunit",
 		"build-zip": "./bin/build-zip.sh",
 		"plugin-check": "./bin/build-zip.sh -q && rm -rf remote-media-source && unzip -q remote-media-source.zip && cd test-envs/source && lando wp plugin install plugin-check --activate && lando wp plugin check /app/wp-content/plugins/remote-media-source/remote-media-source && cd ../.. && rm -rf remote-media-source remote-media-source.zip",
+		"test:e2e": "npx --no-install cypress run",
+		"wp-repo-screenshots": "npx --no-install cypress run --spec tests/e2e/cypress/e2e/wp-repo-screenshots.cy.js && ./bin/sync-wp-repo-screenshots.sh",
 		"check": [
 			"@lint",
 			"@test",
+			"@test:e2e",
 			"@plugin-check"
 		]
 	}
