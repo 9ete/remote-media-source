@@ -13,7 +13,7 @@ spl_autoload_register(
 			return;
 		}
 		$relative = substr( $class_name, strlen( 'RemoteMediaSource\\' ) );
-		$file      = __DIR__ . '/src/' . str_replace( '\\', '/', $relative ) . '.php';
+		$file     = __DIR__ . '/src/' . str_replace( '\\', '/', $relative ) . '.php';
 		if ( file_exists( $file ) ) {
 			require_once $file;
 		}

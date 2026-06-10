@@ -54,7 +54,7 @@ final class KeyManager {
 	public static function verify( string $key ): bool {
 		$stored = (string) get_option( self::HASH_OPTION, '' );
 		$dummy  = str_repeat( '0', strlen( wp_hash( $key ) ) );
-		return hash_equals( $stored ?: $dummy, wp_hash( $key ) );
+		return hash_equals( '' !== $stored ? $stored : $dummy, wp_hash( $key ) );
 	}
 
 	/**

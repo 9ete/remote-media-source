@@ -76,10 +76,12 @@ class RestEndpoint {
 	/**
 	 * Handle the verify request and return site metadata.
 	 *
-	 * @param \WP_REST_Request $request Incoming REST request.
+	 * The request object is not needed — authentication already happened in
+	 * the permission callback and the response carries no request-derived data.
+	 *
 	 * @return \WP_REST_Response
 	 */
-	public static function handle_verify( \WP_REST_Request $request ): \WP_REST_Response {
+	public static function handle_verify(): \WP_REST_Response {
 		$upload_dir = wp_upload_dir();
 
 		return new \WP_REST_Response(

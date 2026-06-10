@@ -319,7 +319,7 @@ class SettingsPage {
 			update_option( 'rms_upload_mode', in_array( $mode, array( 'local', 'block' ), true ) ? $mode : 'local' );
 		}
 
-		wp_redirect( admin_url( 'options-general.php?page=remote-media-source&saved=1' ) );
+		wp_safe_redirect( admin_url( 'options-general.php?page=remote-media-source&saved=1' ) );
 		exit;
 	}
 
@@ -381,11 +381,13 @@ class SettingsPage {
 
 		if ( is_wp_error( $response ) ) {
 			wp_send_json_error(
-				array( 'message' => sprintf(
-					/* translators: %s: error message */
-					esc_html__( 'Verification request failed: %s', 'remote-media-source' ),
-					$response->get_error_message()
-				) )
+				array(
+					'message' => sprintf(
+						/* translators: %s: error message */
+						esc_html__( 'Verification request failed: %s', 'remote-media-source' ),
+						$response->get_error_message()
+					),
+				)
 			);
 			return;
 		}

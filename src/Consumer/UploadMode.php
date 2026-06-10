@@ -52,10 +52,12 @@ class UploadMode {
 	/**
 	 * Block all uploads by returning an empty MIME list.
 	 *
-	 * @param array $_mimes Allowed MIME types (unused — all types are blocked).
+	 * The incoming MIME list is irrelevant — every type is blocked, so the
+	 * filter parameter is intentionally not declared.
+	 *
 	 * @return array Empty array — no type is permitted.
 	 */
-	public static function filter_mimes_block( array $_mimes ): array {
+	public static function filter_mimes_block(): array {
 		return array();
 	}
 

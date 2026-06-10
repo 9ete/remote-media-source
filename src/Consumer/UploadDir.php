@@ -78,7 +78,7 @@ class UploadDir {
 			return $dirs;
 		}
 
-		$base        = rtrim( get_option( 'rms_remote_url', '' ), '/' ) . '/wp-content/uploads';
+		$base            = rtrim( get_option( 'rms_remote_url', '' ), '/' ) . '/wp-content/uploads';
 		$dirs['baseurl'] = $base;
 		$dirs['url']     = $base . '/' . gmdate( 'Y/m' );
 
