@@ -12,3 +12,7 @@
 
 # Lando runtime state
 */.lando/
+
+# Runtime files WordPress writes after setup
+*/.htaccess
+*/debug.log
