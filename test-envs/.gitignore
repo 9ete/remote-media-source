@@ -1,0 +1,18 @@
+# WordPress core downloaded by setup.sh — never commit
+# Covers both root-level (lando wp downloads here) and wordpress/ subdir layouts.
+*/wp-admin/
+*/wp-includes/
+*/wp-content/
+*/wp-*.php
+*/index.php
+*/xmlrpc.php
+*/license.txt
+*/readme.html
+*/wordpress/
+
+# Lando runtime state
+*/.lando/
+
+# Runtime files WordPress writes after setup
+*/.htaccess
+*/debug.log

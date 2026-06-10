@@ -1,0 +1,51 @@
+# Build / VCS / meta
+.distignore
+.editorconfig
+.gitattributes
+.git
+.githooks
+.gitignore
+.github
+
+# AI / IDE
+.claude
+.vscode
+.idea
+*.swp
+.DS_Store
+
+# Dev dependencies
+vendor
+composer.json
+composer.lock
+node_modules
+
+# JS tooling
+package.json
+package-lock.json
+cypress.config.js
+
+# WP.org SVN assets (deployed to the assets/ dir, never inside the plugin zip)
+.wordpress-org
+
+# Tests / QA
+bin
+tests
+phpunit.xml
+phpunit.xml.dist
+phpcs.xml
+phpcs.xml.dist
+.phpunit.result.cache
+
+# Docs / planning
+docs
+brain
+*.md
+*.markdown
+
+# Test environments
+test-envs
+
+# Build output
+zips
+*.zip

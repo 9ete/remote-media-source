@@ -1,0 +1,38 @@
+{
+	"name": "9ete/remote-media-source",
+	"description": "Serve media from a remote WordPress site on local/dev/staging environments.",
+	"license": "GPL-2.0-or-later",
+	"require-dev": {
+		"squizlabs/php_codesniffer": "^3.13",
+		"wp-coding-standards/wpcs": "^3.3",
+		"phpcompatibility/phpcompatibility-wp": "^2.1",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+		"wp-cli/wp-cli-bundle": "^2.12",
+		"phpunit/phpunit": "^10.5"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		},
+		"platform": {
+			"php": "8.1.99"
+		}
+	},
+	"scripts": {
+		"install-hooks": "git config core.hooksPath .githooks",
+		"lint": "phpcs",
+		"lint:fix": "phpcbf",
+		"test": "phpunit",
+		"test:unit:php": "./vendor/bin/phpunit",
+		"build-zip": "./bin/build-zip.sh",
+		"plugin-check": "./bin/build-zip.sh -q && rm -rf .plugin-check-dist && mkdir .plugin-check-dist && unzip -q remote-media-source.zip -d .plugin-check-dist && cd test-envs/source && lando wp plugin install plugin-check --activate && lando wp plugin check /app/wp-content/plugins/remote-media-source/.plugin-check-dist/remote-media-source && cd ../.. && rm -rf .plugin-check-dist remote-media-source.zip",
+		"test:e2e": "npx --no-install cypress run",
+		"wp-repo-screenshots": "npx --no-install cypress run --spec tests/e2e/cypress/e2e/wp-repo-screenshots.cy.js && ./bin/sync-wp-repo-screenshots.sh",
+		"check": [
+			"@lint",
+			"@test",
+			"@test:e2e",
+			"@plugin-check"
+		]
+	}
+}

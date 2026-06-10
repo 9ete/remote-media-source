@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+# Auto-fix formatting on staged PHP files.
+composer lint:fix || true
+
+# Re-stage any files that phpcbf modified so the commit contains the fixes.
+git diff --name-only --diff-filter=ACMR | grep '\.php$' | xargs -r git add
+
+# Fail the commit if unfixable lint violations remain.
+composer lint

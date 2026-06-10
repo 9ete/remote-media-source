@@ -1,0 +1,10 @@
+{
+	"devDependencies": {
+		"cypress": "^13.17.0"
+	},
+	"scripts": {
+		"test:e2e": "cypress run",
+		"test:e2e:open": "cypress open",
+		"wp-repo-screenshots": "cypress run --spec tests/e2e/cypress/e2e/wp-repo-screenshots.cy.js && ./bin/sync-wp-repo-screenshots.sh"
+	}
+}

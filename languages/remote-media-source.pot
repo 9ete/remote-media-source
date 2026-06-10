@@ -1,0 +1,285 @@
+# Copyright (C) 2026 9ete
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Remote Media Source 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/remote-media-source\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-06-10T20:46:33+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: remote-media-source\n"
+
+#. Plugin Name of the plugin
+#: remote-media-source.php:3
+#: src/Admin/SettingsPage.php:35
+#: src/Admin/SettingsPage.php:36
+#: src/Admin/SettingsPage.php:54
+msgid "Remote Media Source"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: remote-media-source.php:4
+msgid "https://lowermedia.net/plugins/remote-media-source"
+msgstr ""
+
+#. Description of the plugin
+#: remote-media-source.php:5
+msgid "Serve media from a remote WordPress site on local/dev/staging environments."
+msgstr ""
+
+#. Author of the plugin
+#: remote-media-source.php:7
+msgid "9ete"
+msgstr ""
+
+#. Author URI of the plugin
+#: remote-media-source.php:8
+msgid "https://lowermedia.net"
+msgstr ""
+
+#: src/Admin/PluginLinks.php:25
+msgid "Settings"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:58
+msgid "Settings saved."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:74
+msgid "Save Settings"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:87
+msgid "Role"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:91
+msgid "This site is a"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:95
+msgid "— Disabled —"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:96
+msgid "Source (this site is the media truth)"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:97
+msgid "Consumer (serve media from remote)"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:100
+msgid "Set to Source on your production site. Set to Consumer on local/dev/staging."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:117
+msgid "Source Settings"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:120
+#: src/Admin/SettingsPage.php:197
+#: src/Admin/SettingsPage.php:277
+msgid "Connection Key"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:126
+msgid "Regenerate Key"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:130
+msgid "Regenerating will invalidate the current key and disconnect all consumers."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:134
+msgid "Generate Connection Key"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:137
+msgid "Generate a key to share with consumer environments."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:159
+msgid "Consumer Settings"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:164
+msgid "Consumer active."
+msgstr ""
+
+#. translators: %s: human-readable time ago
+#: src/Admin/SettingsPage.php:169
+#, php-format
+msgid "Last verified %s ago."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:178
+msgid "Consumer not yet verified. Save settings and click \"Test Connection\"."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:185
+msgid "Remote Source URL"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:191
+msgid "Base URL of the source WordPress site (e.g. https://example.com)."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:202
+msgid "(key saved — enter new key to replace)"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:205
+#: src/Core/Assets.php:58
+msgid "Reveal"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:208
+msgid "Connection key copied from the source site. Stored in the database; restrict wp-admin access accordingly."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:213
+msgid "Upload Mode"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:219
+msgid "Local only (default) — uploads land in the local filesystem"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:224
+msgid "Block uploads — prevent any file uploads on this environment"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:230
+msgid "Connection"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:233
+#: src/Core/Assets.php:56
+msgid "Test Connection"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:256
+msgid "The Remote Source URL was not saved — it must be a valid, publicly resolvable HTTPS URL (e.g. https://example.com)."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:257
+msgid "The connection key was not saved — keys are exactly 64 hexadecimal characters. Copy it from the source site again."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:280
+msgid "Copy this key now. It will not be shown again."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:288
+#: src/Core/Assets.php:59
+msgid "Copy Key"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:291
+msgid "I've copied this key"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:343
+msgid "You do not have permission to change these settings."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:419
+#: src/Admin/SettingsPage.php:445
+msgid "Unauthorized."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:424
+msgid "This site is not configured as a source."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:455
+msgid "Remote Source URL is not configured or not a valid HTTPS URL."
+msgstr ""
+
+#. translators: %s: error message
+#: src/Admin/SettingsPage.php:476
+#, php-format
+msgid "Verification request failed: %s"
+msgstr ""
+
+#: src/Admin/SettingsPage.php:486
+msgid "The remote URL redirected. Configure the final URL directly — redirects are not followed."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:491
+msgid "The source rejected the connection key. Re-copy the key from the source site, or regenerate it there and update this field."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:496
+msgid "The remote site responded, but Remote Media Source does not appear to be active there (its REST endpoint was not found)."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: src/Admin/SettingsPage.php:505
+#, php-format
+msgid "The remote returned a server error (HTTP %d). Check the source site and try again."
+msgstr ""
+
+#: src/Admin/SettingsPage.php:516
+msgid "Remote did not verify. Check your connection key."
+msgstr ""
+
+#. translators: %s: remote site name
+#: src/Admin/SettingsPage.php:537
+#, php-format
+msgid "Connected to %s"
+msgstr ""
+
+#: src/Consumer/UploadMode.php:71
+msgid "Uploads are blocked on this environment. Change the upload mode in Settings › Remote Media Source."
+msgstr ""
+
+#: src/Consumer/UploadMode.php:87
+msgid "File uploads are blocked on this environment by Remote Media Source."
+msgstr ""
+
+#: src/Core/Activator.php:24
+msgid "Remote Media Source requires PHP 8.1 or higher."
+msgstr ""
+
+#: src/Core/Activator.php:25
+msgid "Plugin Activation Error"
+msgstr ""
+
+#: src/Core/Assets.php:52
+msgid "Copied!"
+msgstr ""
+
+#: src/Core/Assets.php:53
+msgid "Copy failed — please select and copy manually."
+msgstr ""
+
+#: src/Core/Assets.php:54
+msgid "Regenerating will invalidate the current key and disconnect all consumers. Continue?"
+msgstr ""
+
+#: src/Core/Assets.php:55
+msgid "Testing…"
+msgstr ""
+
+#: src/Core/Assets.php:57
+msgid "Hide"
+msgstr ""
+
+#: src/Core/Assets.php:60
+msgid "Request failed."
+msgstr ""
+
+#: src/Source/RestEndpoint.php:58
+msgid "Missing or invalid Authorization header. Expected: Authorization: RMS <key>"
+msgstr ""
+
+#: src/Source/RestEndpoint.php:68
+msgid "Invalid connection key."
+msgstr ""

@@ -1,0 +1,22 @@
+name: rms-consumer-1
+recipe: wordpress
+config:
+  webroot: .
+  php: '8.2'
+  database: mariadb:10.6
+
+services:
+  appserver:
+    overrides:
+      volumes:
+        - ../../:/app/wp-content/plugins/remote-media-source
+      # Route rms-source.lndo.site through the Docker host so PHP's
+      # wp_remote_get() can reach the source container's Lando proxy.
+      # Requires Docker Desktop >= 20.10 (host-gateway support).
+      extra_hosts:
+        - "rms-source.lndo.site:host-gateway"
+
+tooling:
+  wp:
+    service: appserver
+    cmd: wp --allow-root
