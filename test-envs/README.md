@@ -14,6 +14,10 @@ All three share the same plugin code via a volume mount — edits to `src/` take
 
 - [Lando](https://lando.dev) ≥ 3.6
 - Docker Desktop ≥ 20.10 (for `host-gateway` support in consumer containers)
+- Node.js ≥ 18 + `npm install` at the repo root (Cypress e2e + screenshot capture)
+
+All three sites must be running for `composer test:e2e`, `composer plugin-check`,
+and the full `composer check` release gate.
 
 ## Setup
 

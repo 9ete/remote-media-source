@@ -58,6 +58,13 @@ On the **source** site, only a hash of the key is stored — the raw key is show
 
 No. Both the source and consumer must be WordPress 6.0+ sites with this plugin installed.
 
+= Which environments and layouts are supported? =
+
+* **Standard single-site WordPress** — fully supported on both roles (covered by the plugin's automated end-to-end suite).
+* **Non-standard uploads layouts** (Bedrock-style `app/uploads`, a custom `upload_url_path`, subdirectory installs) — supported as the source: during connection verification the source reports its real uploads base URL and consumers rewrite against it, so the source's directory layout does not matter.
+* **Multisite (subdirectory or subdomain)** — supported on both roles. Roles, keys, and connections are configured per site. A consumer subsite keeps its own local `sites/N` upload paths while serving media URLs from the source; a source subsite reports its per-site uploads URL (for example `…/uploads/sites/2`) and connected consumers honor it.
+* **Hosting** — any host where media is served from the URL `wp_upload_dir()` reports. If your source serves uploads from a different domain than the site itself (for example a separate CDN domain), the consumer intentionally ignores that cross-host URL and falls back to `{source}/wp-content/uploads`; point the consumer directly at the host that serves the media in that case.
+
 == External Services ==
 
 This plugin communicates with a remote WordPress site configured by the site administrator.
